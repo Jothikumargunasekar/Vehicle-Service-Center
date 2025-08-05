@@ -1,0 +1,116 @@
+1. Company
+
+CREATE TABLE Company (
+    company_id INT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100),
+    phone_no VARCHAR(15),
+    address TEXT
+);
+
+2. Branch
+
+CREATE TABLE Branch (
+    branch_id INT PRIMARY KEY,
+    company_id INT,  -- Remove if only one company
+    manager_id INT,  -- FK to Employee (optional)
+    active_hours VARCHAR(50),
+    phone_no VARCHAR(15),
+    email VARCHAR(100),
+    address TEXT,
+    FOREIGN KEY (company_id) REFERENCES Company(company_id)
+);
+
+3. Employee
+
+CREATE TABLE Employee (
+    emp_id INT PRIMARY KEY,
+    branch_id INT,
+    name VARCHAR(100),
+    role VARCHAR(50),
+    phone_no VARCHAR(15),
+    date_of_joining DATE,
+    experience INT,
+    FOREIGN KEY (branch_id) REFERENCES Branch(branch_id)
+);
+
+4. Customer
+
+CREATE TABLE Customer (
+    customer_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    phone_no VARCHAR(15),
+    email VARCHAR(100),
+    address TEXT
+);
+
+5. Customer_Branch – for tracking visits
+
+CREATE TABLE Customer_Branch (
+    customer_id INT,
+    branch_id INT,
+    visit_date DATE,
+    PRIMARY KEY (customer_id, branch_id, visit_date),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id),
+    FOREIGN KEY (branch_id) REFERENCES Branch(branch_id)
+);
+
+6. Vehicle
+
+CREATE TABLE Vehicle (
+    vehicle_id INT PRIMARY KEY,
+    customer_id INT,
+    registration_no VARCHAR(20) UNIQUE,
+    model VARCHAR(100),
+    vehicle_type VARCHAR(50),
+    FOREIGN KEY (customer_id) REFERENCES Customer(customer_id)
+);
+
+7. Inventory – parts available in a branch
+
+CREATE TABLE Inventory (
+    part_id INT PRIMARY KEY,
+    branch_id INT,
+    part_name VARCHAR(100),
+    available_quantity INT,
+    price DECIMAL(10,2),
+    FOREIGN KEY (branch_id) REFERENCES Branch(branch_id)
+);
+
+8. Service
+
+CREATE TABLE Service (
+    service_id INT PRIMARY KEY,
+    vehicle_id INT,
+    emp_id INT,
+    branch_id INT,
+    service_date DATE,
+    description TEXT,
+    status VARCHAR(20) CHECK (status IN ('Pending', 'In Progress', 'Completed', 'Cancelled', 'Awaiting Parts')),
+    FOREIGN KEY (vehicle_id) REFERENCES Vehicle(vehicle_id),
+    FOREIGN KEY (emp_id) REFERENCES Employee(emp_id),
+    FOREIGN KEY (branch_id) REFERENCES Branch(branch_id)
+);
+
+9. Service_Parts – parts used in a service
+
+CREATE TABLE Service_Parts (
+    service_id INT,
+    part_id INT,
+    quantity_used INT,
+    PRIMARY KEY (service_id, part_id),
+    FOREIGN KEY (service_id) REFERENCES Service(service_id),
+    FOREIGN KEY (part_id) REFERENCES Inventory(part_id)
+);
+
+10. Billing
+
+CREATE TABLE Billing (
+    bill_id INT PRIMARY KEY,
+    service_id INT,
+    total_amount DECIMAL(10,2),
+    amount_paid DECIMAL(10,2),
+    transaction_mode VARCHAR(30),
+    billing_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (service_id) REFERENCES Service(service_id)
+);
